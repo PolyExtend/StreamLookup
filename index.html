@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StreamLookup">
+    <meta name="keywords" content="PolyExtend, browser extension, Twitch,  emotes">
+    <title>PolyExtended - Stream Lookup</title>
+    <link rel="icon" href="https://poly.x10.mx/poly.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .card {
+            width: 11rem;
+            /* Add other card styling here */
+        }
+
+        .card img {
+            width: 26%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-light">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="http://polyextend.github.io">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="http://polyextend.github.io/extend/">PolyExtend</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="http://polyextend.github.io/StreamLookup">Channel Lookup</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container mt-4">
+        <!-- Bootstrap form component -->
+        <form id="channelLookupForm" class="mb-4">
+            <div class="mb-3">
+                <label for="inputField" class="form-label">Enter Channel Name:</label>
+                <input type="text" class="form-control" id="inputField" name="user_input" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        
+        <div class="card-container" id="emoteContainer">
+            <!-- Emotes will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('channelLookupForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const channel = document.getElementById('inputField').value;
+            const api_url = `https://emotes.adamcy.pl/v1/channel/${channel}/emotes/all`;
+
+            fetch(api_url)
+                .then(response => response.json())
+                .then(data => {
+                    const emoteContainer = document.getElementById('emoteContainer');
+                    emoteContainer.innerHTML = '';
+
+                    data.forEach(emote => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+
+                        const img = document.createElement('img');
+                        img.src = emote.urls[0].url;
+                        img.alt = emote.code;
+
+                        const cardBody = document.createElement('div');
+                        cardBody.className = 'card-body';
+
+                        const cardText = document.createElement('p');
+                        cardText.className = 'card-text';
+                        cardText.textContent = emote.code;
+
+                        cardBody.appendChild(cardText);
+
+                        // Display provider information based on the value
+                        if (emote.provider === 1) {
+                            const providerText = document.createElement('p');
+                            providerText.className = 'card-text';
+                            providerText.innerHTML = `From: <a href="https://bit.ly/Bacon7TV" target="_blank">SevenTV</a>`;
+                            cardBody.appendChild(providerText);
+                        } else if (emote.provider === 2) {
+                            const providerText = document.createElement('p');
+                            providerText.className = 'card-text';
+                            providerText.innerHTML = `From: <a href="https://bit.ly/BaconBTTV" target="_blank">BetterTwitchTV</a>`;
+                            cardBody.appendChild(providerText);
+                        } else if (emote.provider === 3) {
+                            const providerText = document.createElement('p');
+                            providerText.className = 'card-text';
+                            providerText.innerHTML = `From: <a href="https://bit.ly/BaconFFZ" target="_blank">FrankerFaceZ</a>`;
+                            cardBody.appendChild(providerText);
+                        } else {
+                            const providerText = document.createElement('p');
+                            providerText.className = 'card-text';
+                            providerText.innerHTML = `From: <a href="https://twitch.tv/${channel}" target="_blank">Twitch</a>`;
+                            cardBody.appendChild(providerText);
+                        }
+
+                        card.appendChild(img);
+                        card.appendChild(cardBody);
+                        emoteContainer.appendChild(card);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+    </script>
+</body>
+</html>
